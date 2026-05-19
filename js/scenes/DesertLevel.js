@@ -116,8 +116,7 @@ class DesertLevel extends Phaser.Scene {
         this.physics.add.existing(r, true);
         const mp = { rect: r, minX, maxX, dir: 1, speed: 80 };
         this._movingPlatforms.push(mp);
-        this.physics.add.collider(this.player, { getChildren: () => [r], ...this.physics.add.staticGroup() });
-        // manual collide in update
+        // collision handled manually in _updateMovingPlatforms
     }
 
     _updateMovingPlatforms() {
