@@ -1,106 +1,84 @@
 class ScoreScene extends Phaser.Scene {
-    constructor() {
-        super({ key: 'ScoreScene' });
-    }
+    constructor() { super({ key: 'ScoreScene' }); }
 
     init(data) {
-        this.levelCompleted = data.levelCompleted || '未知关卡';
-        this.nextLevel = data.nextLevel || 'MenuScene';
+        this.levelCompleted = data.levelCompleted || '';
+        this.nextLevel      = data.nextLevel || 'MenuScene';
+        this.levelBonus     = data.levelBonus || 0;
+        this.timeBonus      = data.timeBonus  || 0;
+        this.coinBonus      = data.coinBonus  || 0;
+        this.livesBonus     = data.livesBonus || 0;
     }
 
     create() {
-        this.cameras.main.setBackgroundColor('#2c3e50');
+        this.cameras.main.setBackgroundColor('#0f3460');
 
-        // 生成彩纸纹理
-        let g = this.add.graphics();
-        g.fillStyle(0xffffff, 1);
-        g.fillRect(0,0,10,10);
-        g.generateTexture('confetti', 10, 10);
-        g.destroy();
+        const isComplete = (this.nextLevel === 'GameComplete');
+        const titleStr   = isComplete ? i18n.t('allClear') : i18n.t('levelClear');
+        const titleColor = isComplete ? '#ffd700' : '#2ecc71';
 
-        const isGameBeaten = this.nextLevel === 'GameComplete';
-        const titleStr = isGameBeaten ? '🎉 恭喜全部通关！ 🎉' : '关卡完成！';
-        const titleColor = isGameBeaten ? '#ffdf00' : '#2ecc71';
+        // Stars
+        for (let i=0;i<60;i++){
+            const s=this.add.circle(Phaser.Math.Between(0,800),Phaser.Math.Between(0,600),Phaser.Math.Between(1,3),0xffffff,Phaser.Math.FloatBetween(0.3,1));
+            this.tweens.add({targets:s,alpha:0.05,duration:Phaser.Math.Between(600,2000),yoyo:true,repeat:-1});
+        }
 
-        // 结算标题
-        const titleText = this.add.text(400, 150, titleStr, {
-            fontSize: isGameBeaten ? '56px' : '48px',
-            fill: titleColor,
-            fontStyle: 'bold',
-            stroke: '#000000',
-            strokeThickness: 5
-        });
-        titleText.setOrigin(0.5);
+        const title = this.add.text(400,100,titleStr,{
+            fontSize:isComplete?'48px':'42px', fill:titleColor, fontStyle:'bold', stroke:'#000', strokeThickness:6
+        }).setOrigin(0.5);
+        if (isComplete) this.tweens.add({targets:title,scaleX:1.08,scaleY:1.08,duration:700,yoyo:true,repeat:-1});
 
-        // 如果通关，加个缩放呼吸动画和彩带
-        if (isGameBeaten) {
-            this.tweens.add({
-                targets: titleText,
-                scaleX: 1.1,
-                scaleY: 1.1,
-                duration: 800,
-                yoyo: true,
-                repeat: -1
-            });
-
-            // 撒花粒子效果
-            const colors = [0xff0000, 0x00ff00, 0x0000ff, 0xffff00, 0xff00ff, 0x00ffff];
-            this.add.particles(0, -50, 'confetti', {
-                x: { min: 0, max: 800 },
-                lifespan: 4000,
-                speedY: { min: 100, max: 300 },
-                speedX: { min: -100, max: 100 },
-                angle: { min: 0, max: 360 },
-                gravityY: 150,
-                scale: { start: 1, end: 0 },
-                tint: colors,
-                frequency: 50
+        // Confetti
+        if (isComplete) {
+            let cg=this.add.graphics(); cg.fillStyle(0xffffff); cg.fillRect(0,0,8,8); cg.generateTexture('conf',8,8); cg.destroy();
+            this.add.particles(0,-30,'conf',{
+                x:{min:0,max:800}, lifespan:3500, speedY:{min:80,max:250}, speedX:{min:-80,max:80},
+                gravityY:120, scale:{start:1,end:0}, tint:[0xff4757,0x2ecc71,0x3498db,0xffd700,0xff79c6], frequency:40
             });
         }
 
-        // 显示完成的关卡
-        const levelText = this.add.text(400, 250, `已通过: ${this.levelCompleted}`, {
-            fontSize: '32px',
-            fill: '#ecf0f1'
-        });
-        levelText.setOrigin(0.5);
+        this.add.text(400,165,`${i18n.t('completed')}: ${this.levelCompleted}`,{fontSize:'26px',fill:'#ecf0f1'}).setOrigin(0.5);
 
-        // 获取并显示得分
-        const currentScore = this.registry.get('score') || 0;
-        const scoreText = this.add.text(400, 320, `当前总得分: ${currentScore}`, {
-            fontSize: '28px',
-            fill: '#f1c40f'
+        // Score breakdown table
+        const rows = [
+            [i18n.t('levelBonus'), this.levelBonus],
+            [i18n.t('timeBonus'),  this.timeBonus],
+            [i18n.t('coinBonus'),  this.coinBonus],
+            [i18n.t('livesBonus'), this.livesBonus],
+        ];
+        let rowY = 220;
+        rows.forEach(([label, val])=>{
+            if (val <= 0) return;
+            this.add.text(290,rowY,label,{fontSize:'20px',fill:'#aaa'}).setOrigin(1,0);
+            this.add.text(310,rowY,`+${val}`,{fontSize:'20px',fill:'#ffd700'});
+            rowY+=36;
         });
-        scoreText.setOrigin(0.5);
 
-        // 更新最高分
-        let highScore = parseInt(localStorage.getItem('mario_highscore') || '0');
-        if (currentScore > highScore) {
-            localStorage.setItem('mario_highscore', currentScore);
-            const newRecordText = this.add.text(400, 370, '新纪录！', {
-                fontSize: '24px', fill: '#e74c3c', fontStyle: 'bold'
-            }).setOrigin(0.5);
-            this.tweens.add({ targets: newRecordText, alpha: 0, duration: 500, yoyo: true, repeat: -1 });
-        }
-        
-        const btnTextStr = isGameBeaten ? '回到主菜单' : '进入下一关';
-        
-        // 下一步按钮
-        const btnBg = this.add.rectangle(400, 480, 220, 60, 0x3498db).setInteractive();
-        const btnText = this.add.text(400, 480, btnTextStr, {
-            fontSize: '24px', fill: '#ffffff', fontStyle: 'bold'
+        const totalScore = this.registry.get('score') || 0;
+        this.add.text(400,rowY+14,`${i18n.t('totalScore')}: ${totalScore}`,{
+            fontSize:'30px',fill:'#ffd700',fontStyle:'bold',stroke:'#000',strokeThickness:4
         }).setOrigin(0.5);
 
-        // 按钮交互
-        btnBg.on('pointerover', () => btnBg.setFillStyle(0x2980b9));
-        btnBg.on('pointerout', () => btnBg.setFillStyle(0x3498db));
-        btnBg.on('pointerdown', () => {
-            if (isGameBeaten) {
-                this.scene.start('MenuScene');
-            } else {
-                this.scene.start(this.nextLevel);
-            }
+        // High score
+        let hs = parseInt(localStorage.getItem('mario_highscore')||'0');
+        if (totalScore > hs) {
+            localStorage.setItem('mario_highscore', totalScore);
+            const nr=this.add.text(400,rowY+54,i18n.t('newRecord'),{fontSize:'24px',fill:'#ff4757',fontStyle:'bold'}).setOrigin(0.5);
+            this.tweens.add({targets:nr,alpha:0,duration:450,yoyo:true,repeat:-1});
+        }
+
+        // Button
+        const btnLabel = isComplete ? i18n.t('backToMenu') : i18n.t('nextLevel');
+        const btn = this.add.rectangle(400,520,260,54,isComplete?0x8e44ad:0x27ae60).setInteractive().setOrigin(0.5);
+        btn.setStrokeStyle(2,0xffffff,0.4);
+        this.add.text(400,520,btnLabel,{fontSize:'24px',fill:'#fff',fontStyle:'bold',stroke:'#000',strokeThickness:3}).setOrigin(0.5);
+        btn.on('pointerdown',()=>{
+            audioManager.stopBGM();
+            if (isComplete) this.scene.start('MenuScene');
+            else this.scene.start(this.nextLevel);
         });
+        btn.on('pointerover',()=>btn.setAlpha(0.8));
+        btn.on('pointerout', ()=>btn.setAlpha(1));
     }
 }
 window.ScoreScene = ScoreScene;

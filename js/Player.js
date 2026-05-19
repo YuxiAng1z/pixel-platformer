@@ -1,92 +1,104 @@
-// 玩家类，继承自 Phaser.Physics.Arcade.Sprite
-// 由于使用纯 JS 无模块系统，我们把它放在全局作用域
 class Player extends Phaser.Physics.Arcade.Sprite {
     constructor(scene, x, y) {
-        // 先调用父类构造函数，这里我们暂时不使用图片，而是用一个空的 texture，然后马上给自己画个矩形
-        super(scene, x, y, null);
-
-        // 添加到场景和物理世界
+        super(scene, x, y, 'player');
         scene.add.existing(this);
         scene.physics.add.existing(this);
 
-        // 设置玩家尺寸和外观 (缩小碰撞框防止穿模，精准计算偏移量)
+        this.setDisplaySize(36, 36);
         this.body.setSize(24, 30);
-        this.body.setOffset(4, 2); // 调整物理碰撞框偏移，确保 body bottom 完美对齐视觉底部
+        this.body.setOffset(6, 3);
 
-        // 使用 Graphics 绘制玩家细节
-        this.graphics = scene.add.graphics();
-        // 帽子
-        this.graphics.fillStyle(0xff0000, 1);
-        this.graphics.fillRect(-14, -16, 28, 8);
-        // 脸部
-        this.graphics.fillStyle(0xffcc99, 1);
-        this.graphics.fillRect(-12, -8, 24, 12);
-        // 眼睛
-        this.graphics.fillStyle(0x000000, 1);
-        this.graphics.fillRect(-6, -4, 4, 4);
-        this.graphics.fillRect(6, -4, 4, 4);
-        // 衣服
-        this.graphics.fillStyle(0x0000ff, 1);
-        this.graphics.fillRect(-14, 4, 28, 12);
-        // 手
-        this.graphics.fillStyle(0xffffff, 1);
-        this.graphics.fillRect(-16, 4, 6, 6);
-        this.graphics.fillRect(10, 4, 6, 6);
+        this.setCollideWorldBounds(false);
+        this.setBounce(0.05);
 
-        // 物理属性
-        this.setCollideWorldBounds(false); // 允许掉出屏幕边界
-        this.setBounce(0.1);
-
-        // 基础移动速度和跳跃力量（由于全局重力增加，需相应提高）
-        this.moveSpeed = 200;
+        this.moveSpeed = 210;
         this.jumpForce = -650;
-
-        // 获取键盘输入
-        this.cursors = scene.input.keyboard.createCursorKeys();
-
-        // 状态
         this.isDead = false;
+        this.jumpsLeft = 2; // double jump
+
+        const platform = scene.registry.get('platform') || 'pc';
+        this.isMobile = (platform === 'mobile');
+
+        if (!this.isMobile) {
+            this.cursors = scene.input.keyboard.createCursorKeys();
+            this.wasd = scene.input.keyboard.addKeys({
+                up:    Phaser.Input.Keyboard.KeyCodes.W,
+                left:  Phaser.Input.Keyboard.KeyCodes.A,
+                down:  Phaser.Input.Keyboard.KeyCodes.S,
+                right: Phaser.Input.Keyboard.KeyCodes.D,
+            });
+            this.spaceKey = scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
+            // Track jump keydown for single trigger
+            this._jumpDown = false;
+        }
+
+        this.mobileCtrl = null; // set by level after construction
     }
 
     preUpdate(time, delta) {
         super.preUpdate(time, delta);
-
         if (this.isDead) return;
 
-        // 让图形跟随物理身体
-        this.graphics.x = this.x;
-        this.graphics.y = this.y;
+        const onGround = this.body.touching.down || this.body.blocked.down;
+        if (onGround) this.jumpsLeft = 2;
 
-        // 水平移动
-        if (this.cursors.left.isDown) {
-            this.setVelocityX(-this.moveSpeed);
-        } else if (this.cursors.right.isDown) {
-            this.setVelocityX(this.moveSpeed);
-        } else {
-            this.setVelocityX(0);
+        let goLeft = false, goRight = false, jumpTrigger = false;
+
+        if (this.isMobile && this.mobileCtrl) {
+            goLeft  = this.mobileCtrl.left;
+            goRight = this.mobileCtrl.right;
+            jumpTrigger = this.mobileCtrl.consumeJump();
+        } else if (this.cursors) {
+            goLeft  = this.cursors.left.isDown  || this.wasd.left.isDown;
+            goRight = this.cursors.right.isDown || this.wasd.right.isDown;
+            const jumpDown = this.cursors.up.isDown || this.wasd.up.isDown || this.spaceKey.isDown;
+            if (jumpDown && !this._jumpDown) { jumpTrigger = true; }
+            this._jumpDown = jumpDown;
+            // Variable jump height
+            if (!jumpDown && this.body.velocity.y < -200) {
+                this.setVelocityY(this.body.velocity.y * 0.88);
+            }
         }
 
-        // 跳跃 (加入郊游控制，按得越久跳得越高，松开按键后如果还在上升则削减速度)
-        if (this.cursors.up.isDown && this.body.touching.down) {
-            this.setVelocityY(this.jumpForce);
-        } else if (!this.cursors.up.isDown && this.body.velocity.y < -200) {
-            this.setVelocityY(-200);
+        // Horizontal
+        if (goLeft)       { this.setVelocityX(-this.moveSpeed); this.setFlipX(true); }
+        else if (goRight) { this.setVelocityX(this.moveSpeed);  this.setFlipX(false); }
+        else              { this.setVelocityX(0); }
+
+        // Jump
+        if (jumpTrigger && this.jumpsLeft > 0) {
+            const isDouble = this.jumpsLeft < 2;
+            this.setVelocityY(isDouble ? this.jumpForce * 0.85 : this.jumpForce);
+            this.jumpsLeft--;
+            if (isDouble) {
+                audioManager.playSFX('double_jump');
+                this._showDoubleJumpFX();
+            } else {
+                audioManager.playSFX('jump');
+            }
         }
+    }
+
+    _showDoubleJumpFX() {
+        const sparks = this.scene.add.particles(this.x, this.y + 10, 'coin', {
+            speed: { min: 60, max: 140 },
+            lifespan: 300,
+            scale: { start: 0.4, end: 0 },
+            quantity: 8,
+            tint: [0x00e5ff, 0xffffff],
+        });
+        this.scene.time.delayedCall(300, () => sparks.destroy());
     }
 
     die() {
         if (this.isDead) return;
         this.isDead = true;
-        this.setTint(0x555555); // 变灰
-        this.graphics.fillStyle(0x555555, 1);
-        this.graphics.fillRect(-16, -16, 32, 32);
-
-        this.setVelocityY(-200); // 死亡弹跳
-        this.body.checkCollision.none = true; // 取消碰撞
-
-        // 通知场景玩家死亡
+        this.setTint(0x888888);
+        this.setVelocityY(-250);
+        this.body.checkCollision.none = true;
+        audioManager.playSFX('die');
         this.scene.time.delayedCall(1000, () => {
-            this.scene.handlePlayerDeath();
+            if (this.scene && this.scene.handlePlayerDeath) this.scene.handlePlayerDeath();
         });
     }
 }

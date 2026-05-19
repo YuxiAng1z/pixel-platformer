@@ -2,37 +2,49 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>马里奥风格闯关游戏</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>像素风闯关游戏</title>
     <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            margin: 0;
-            padding: 0;
-            background-color: #222;
+            background: #111;
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
-            color: white;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden;
         }
-        #game-container {
-            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+        #game-container canvas {
+            display: block;
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+            max-width: 100vw;
+            max-height: 100vh;
         }
     </style>
-    <!-- 引入 Phaser 3 -->
     <script src="https://cdn.jsdelivr.net/npm/phaser@3.80.1/dist/phaser.min.js"></script>
 </head>
 <body>
     <div id="game-container"></div>
 
-    <!-- 引入游戏脚本 (注意顺序) -->
+    <!-- Core systems -->
+    <script src="js/i18n.js"></script>
+    <script src="js/AudioManager.js"></script>
+    <script src="js/LevelMixin.js"></script>
     <script src="js/Player.js"></script>
+    <script src="js/MobileControls.js"></script>
+
+    <!-- Scenes -->
+    <script src="js/scenes/BootScene.js"></script>
+    <script src="js/scenes/PlatformSelectScene.js"></script>
     <script src="js/scenes/MenuScene.js"></script>
     <script src="js/scenes/ScoreScene.js"></script>
     <script src="js/scenes/ForestLevel.js"></script>
     <script src="js/scenes/DesertLevel.js"></script>
     <script src="js/scenes/OceanLevel.js"></script>
+    <script src="js/scenes/BossScene.js"></script>
+
+    <!-- Game entry -->
     <script src="js/main.js"></script>
 </body>
 </html>
