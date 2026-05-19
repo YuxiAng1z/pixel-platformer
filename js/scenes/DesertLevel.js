@@ -173,6 +173,14 @@ class DesertLevel extends Phaser.Scene {
         this.add.circle(720,90,45,0xff6600).setScrollFactor(0).setDepth(-3);
     }
 
+    _drawDoor(x, y) {
+        const g = this.add.graphics().setDepth(5);
+        g.fillStyle(0x8B4513); g.fillRect(x - 20, y - 50, 40, 60);
+        g.fillStyle(0x654321); g.fillRect(x - 15, y - 45, 30, 55);
+        g.fillStyle(0xffd700); g.fillCircle(x + 10, y - 20, 5);
+        this.tweens.add({ targets: g, alpha: 0.6, duration: 800, yoyo: true, repeat: -1 });
+    }
+
     handlePlayerDeath() { LevelMixin.handlePlayerDeath(this); }
     update() {}
 }
