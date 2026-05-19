@@ -313,13 +313,14 @@ const LevelMixin = {
         if (dead.includes(id)) return null;
         const e = scene.physics.add.sprite(x, y, key).setDisplaySize(36, 36);
         e.enemyId = id;
+        group.add(e);
+        // Set velocity AFTER group.add to prevent reset
         e.body.setVelocityX(vx);
         e.body.setBounce(1, 0);
         e.body.setCollideWorldBounds(false);
-        group.add(e);
         // Flip sprite on direction change
-        scene.tweens.addCounter({ from: 0, to: 1, duration: 100, repeat: -1, onUpdate: () => {
-            if (e.active) e.setFlipX(e.body.velocity.x > 0);
+        scene.tweens.addCounter({ from: 0, to: 1, duration: 200, repeat: -1, onUpdate: () => {
+            if (e.active && e.body) e.setFlipX(e.body.velocity.x > 0);
         }});
         return e;
     }

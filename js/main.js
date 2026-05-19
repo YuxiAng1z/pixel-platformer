@@ -7,6 +7,9 @@ const config = {
         width: 800,
         height: 600,
     },
+    input: {
+        activePointers: 3, // support simultaneous joystick + jump on mobile
+    },
     physics: {
         default: 'arcade',
         arcade: { gravity: { y: 1200 }, debug: false }

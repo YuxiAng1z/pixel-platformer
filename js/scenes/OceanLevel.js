@@ -114,10 +114,16 @@ class OceanLevel extends Phaser.Scene {
             const id = `${k}_${x}`;
             if (dead.includes(id)) return;
             const e = this.physics.add.sprite(x, y, k).setDisplaySize(36, 36);
-            e.enemyId = id; e.body.setAllowGravity(false);
-            e.body.setVelocityY(-55); e.body.setBounce(0,1);
+            e.enemyId = id;
             this.enemies.add(e);
-            const top=this.add.rectangle(x,y-80,32,8,0,0); this.physics.add.existing(top,true); this.physics.add.collider(e,top);
+            // Set physics AFTER group.add to prevent reset
+            e.body.setAllowGravity(false);
+            e.body.setVelocityY(-55);
+            e.body.setBounce(0, 1);
+            // Invisible top/bottom walls for vertical range
+            const top = this.add.rectangle(x - 16, y - 80, 64, 8, 0, 0).setOrigin(0, 0);
+            this.physics.add.existing(top, true);
+            this.physics.add.collider(e, top);
             const bot=this.add.rectangle(x,y+80,32,8,0,0); this.physics.add.existing(bot,true); this.physics.add.collider(e,bot);
             // Pulse scale for animation feel
             this.tweens.add({ targets:e, scaleY:0.85, duration:400, yoyo:true, repeat:-1 });
