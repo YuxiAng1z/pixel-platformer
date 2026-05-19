@@ -90,7 +90,7 @@ const LevelMixin = {
             .setStrokeStyle(2, 0x00e5ff));
 
         // Title
-        objs.push(scene.add.text(400, 190, '⏸  PAUSE', {
+        objs.push(scene.add.text(400, 190, i18n.t('pauseTitle'), {
             fontSize: '30px', fill: '#00e5ff', fontStyle: 'bold', stroke: '#000', strokeThickness: 4
         }).setOrigin(0.5).setScrollFactor(0).setDepth(82));
 
@@ -108,10 +108,10 @@ const LevelMixin = {
         };
 
         // Resume
-        mkBtn('▶  继续游戏', 255, 0x27ae60, () => LevelMixin._closePause(scene, objs));
+        mkBtn(i18n.t('resume'), 255, 0x27ae60, () => LevelMixin._closePause(scene, objs));
 
         // Restart
-        mkBtn('↺  重新开始', 315, 0xe67e22, () => {
+        mkBtn(i18n.t('restart'), 315, 0xe67e22, () => {
             objs.forEach(o => o.destroy());
             scene._paused = false;
             scene.physics.world.resume();
@@ -121,10 +121,10 @@ const LevelMixin = {
         });
 
         // Settings (timer + language)
-        mkBtn('⚙  设置', 375, 0x2980b9, () => LevelMixin._openPauseSettings(scene, objs));
+        mkBtn(i18n.t('settings'), 375, 0x2980b9, () => LevelMixin._openPauseSettings(scene, objs));
 
         // Back to menu
-        mkBtn('🏠  主菜单', 435, 0x8e44ad, () => {
+        mkBtn(i18n.t('mainMenu'), 435, 0x8e44ad, () => {
             objs.forEach(o => o.destroy());
             scene._paused = false;
             scene.physics.world.resume();

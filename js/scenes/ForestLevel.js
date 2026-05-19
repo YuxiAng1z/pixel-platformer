@@ -114,10 +114,10 @@ class ForestLevel extends Phaser.Scene {
     }
 
     _buildDecorations() {
-        // Trees
-        [[180,500],[480,500],[820,500],[1200,500],[1650,500],[2100,500],[2750,500]].forEach(([x,y]) => {
-            this.add.rectangle(x+10,y-50,18,60,0x5a3e28).setOrigin(0,0).setDepth(-1);
-            this.add.circle(x+19,y-60,36,0x2d6a2d).setDepth(-1);
+        // Trees (grounded at y=560)
+        [[180,560],[480,560],[820,560],[1200,560],[1650,560],[2100,560],[2750,560]].forEach(([x,y]) => {
+            this.add.rectangle(x+10, y-60, 18, 60, 0x5a3e28).setOrigin(0,0).setDepth(-1); // trunk
+            this.add.circle(x+19, y-70, 36, 0x2d6a2d).setDepth(-1); // leaves
         });
         // Clouds
         [[120,80],[450,130],[850,90],[1300,110],[1800,80],[2400,120]].forEach(([x,y]) => {

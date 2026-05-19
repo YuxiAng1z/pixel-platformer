@@ -14,6 +14,7 @@ const LANG_DATA = {
         platform_mobile_desc: '虚拟摇杆 + 跳跃按钮', bossTitle: '深海章鱼',
         bossHp: 'BOSS', timeUp: '时间到！', retry: '重试',
         doubleJump: '二段跳！', loading: '加载中...', close: '关闭',
+        pauseTitle: '⏸  暂停', resume: '▶  继续游戏', restart: '↺  重新开始', mainMenu: '🏠  主菜单',
     },
     'zh-TW': {
         gameName: '像素風闖關遊戲', startGame: '開始遊戲', settings: '⚙ 設置',
@@ -30,6 +31,7 @@ const LANG_DATA = {
         platform_mobile_desc: '虛擬搖桿 + 跳躍按鈕', bossTitle: '深海章魚',
         bossHp: 'BOSS', timeUp: '時間到！', retry: '重試',
         doubleJump: '二段跳！', loading: '載入中...', close: '關閉',
+        pauseTitle: '⏸  暫停', resume: '▶  繼續遊戲', restart: '↺  重新開始', mainMenu: '🏠  主選單',
     },
     'en': {
         gameName: 'Pixel Platformer', startGame: 'Start Game', settings: '⚙ Settings',
@@ -46,6 +48,7 @@ const LANG_DATA = {
         platform_mobile_desc: 'Virtual Joystick + Jump Button', bossTitle: 'Deep Sea Octopus',
         bossHp: 'BOSS', timeUp: "Time's Up!", retry: 'Retry',
         doubleJump: 'Double Jump!', loading: 'Loading...', close: 'Close',
+        pauseTitle: '⏸  PAUSE', resume: '▶  Resume', restart: '↺  Restart', mainMenu: '🏠  Main Menu',
     },
     'ja': {
         gameName: 'ピクセルアクション', startGame: 'ゲームスタート', settings: '⚙ 設定',
@@ -62,6 +65,7 @@ const LANG_DATA = {
         platform_mobile_desc: '仮想スティック + ジャンプボタン', bossTitle: '深海タコボス',
         bossHp: 'BOSS', timeUp: '時間切れ！', retry: 'リトライ',
         doubleJump: '二段ジャンプ！', loading: 'ロード中...', close: '閉じる',
+        pauseTitle: '⏸  ポーズ', resume: '▶  続ける', restart: '↺  やり直し', mainMenu: '🏠  メニューへ',
     }
 };
 
