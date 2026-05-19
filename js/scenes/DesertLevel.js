@@ -126,21 +126,21 @@ class DesertLevel extends Phaser.Scene {
             if (mp.rect.x > mp.maxX) mp.dir = -1;
             if (mp.rect.x < mp.minX) mp.dir = 1;
 
-            // Manual player collision
+            // Manual AABB player collision
             if (this.player && !this.player.isDead) {
                 const pb = this.player.body, rb = mp.rect.body;
-                if (Phaser.Geom.Rectangle.Overlaps(
-                    new Phaser.Geom.Rectangle(pb.x,pb.y,pb.width,pb.height),
-                    new Phaser.Geom.Rectangle(rb.x,rb.y,rb.width,rb.height)
-                ) && this.player.body.velocity.y >= 0 && this.player.y < mp.rect.y) {
-                    this.player.setY(mp.rect.y - this.player.displayHeight/2 - 1);
+                const overlaps = pb.x < rb.right && pb.right > rb.x &&
+                                 pb.y < rb.bottom && pb.bottom > rb.y;
+                if (overlaps && pb.velocity.y >= 0 && this.player.y < mp.rect.y) {
+                    this.player.setY(mp.rect.y - this.player.displayHeight / 2 - 1);
                     this.player.body.setVelocityY(0);
                     this.player.jumpsLeft = 2;
-                    this.player.x += mp.dir * mp.speed * (1/60);
+                    this.player.x += mp.dir * mp.speed * (1 / 60);
                 }
             }
         });
     }
+
 
     _updateWind() {
         if (!this.player || this.player.isDead) return;
