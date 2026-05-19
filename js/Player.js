@@ -12,7 +12,7 @@ class Player extends Phaser.Physics.Arcade.Sprite {
         this.setBounce(0.05);
 
         this.moveSpeed = 210;
-        this.jumpForce = -650;
+        this.jumpForce = -610;
         this.isDead = false;
         this.jumpsLeft = 2; // double jump
 

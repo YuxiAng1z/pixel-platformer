@@ -113,11 +113,27 @@ const LevelMixin = {
         // Restart
         mkBtn(i18n.t('restart'), 315, 0xe67e22, () => {
             objs.forEach(o => o.destroy());
-            scene._paused = false;
-            scene.physics.world.resume();
-            scene.tweens.resumeAll();
-            audioManager.stopBGM();
-            scene.scene.restart();
+            let count = 3;
+            const countText = scene.add.text(400, 300, count.toString(), {
+                fontSize: '80px', fill: '#fff', fontStyle: 'bold', stroke: '#000', strokeThickness: 8
+            }).setOrigin(0.5).setScrollFactor(0).setDepth(100);
+
+            scene.time.addEvent({
+                delay: 1000,
+                repeat: 2,
+                callback: () => {
+                    count--;
+                    if (count > 0) {
+                        countText.setText(count.toString());
+                    } else {
+                        scene._paused = false;
+                        scene.physics.world.resume();
+                        scene.tweens.resumeAll();
+                        audioManager.stopBGM();
+                        scene.scene.restart();
+                    }
+                }
+            });
         });
 
         // Settings (timer + language)
@@ -195,13 +211,15 @@ const LevelMixin = {
             }).setOrigin(0.5).setScrollFactor(0).setDepth(92);
             lb.on('pointerdown', () => {
                 i18n.setLang(l);
+                // Dynamically update HUD Score
+                if (scene._hudScore) scene._hudScore.setText(`${i18n.t('score')}: ${scene.registry.get('score')||0}`);
+                
+                // Refresh pause menus without restarting scene
                 objs.forEach(o=>o.destroy());
                 pauseObjs.forEach(o=>o.destroy());
                 scene._paused = false;
-                scene.physics.world.resume();
-                scene.tweens.resumeAll();
-                audioManager.stopBGM();
-                scene.scene.restart();
+                LevelMixin._openPause(scene);
+                LevelMixin._openPauseSettings(scene, scene._pauseObjs);
             });
             objs.push(lb, lt);
         });
