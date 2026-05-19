@@ -21,7 +21,7 @@ const LevelMixin = {
             fontSize: '22px', fill: '#ff4757', stroke: '#000', strokeThickness: 3
         }).setScrollFactor(0).setDepth(50);
 
-        scene._hudScore = scene.add.text(784, 16, `${i18n.t('score')}: ${scene.registry.get('score')||0}`, {
+        scene._hudScore = scene.add.text(740, 16, `${i18n.t('score')}: ${scene.registry.get('score')||0}`, {
             fontSize: '22px', fill: '#ffd700', stroke: '#000', strokeThickness: 3
         }).setOrigin(1, 0).setScrollFactor(0).setDepth(50);
 
